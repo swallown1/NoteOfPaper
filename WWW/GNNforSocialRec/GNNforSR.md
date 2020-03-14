@@ -61,15 +61,41 @@
 方法：使用两种类型的聚合来从两个图中学习因子。
 
 - 第一种聚合（表示为项目聚合）被用来从用户-那里获取项目空间用户潜在因子hIi∈Rd。 项聚合的目的是通过考虑用户ui与之交互的项以及用户对这些项的意见，来学习项空间用户潜在因子hIi。 
+    
     为了数学上表示此聚合，我们使用以下函数作为：
+	
 	![公式1](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/math1.png)
+	
 	其中C（i）是用户ui已与之交互的项目集（或用户项目图中ui的邻居），
 	
 	xia是表示ui与项目va之间的感知感知交互的表示向量，而Aggreitems为 项目汇总功能。 
+	
 	其中xia由下图可得
 	![公式2](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/math4.png)
 	
+	其中⊕表示两个向量之间的串联运算。
+	
+	Aggreitems的一种流行的聚集函数是均值算子，我们采用{xia，∀a∈C（i）}中向量的元素平均法。其函数如下： 
+	![公式3](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/math2.png)
+    
+    为了缓解基于注意力机制启发的基于均值的聚合器的局限性，一种直观的解决方案是调整αi以了解目标用户ui，即为每个（va，ui）对分配个性化权重 ，
+	![公式4](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/math3.png)
+    
+    其中αai固定为1 | C（i）| 基于均值的聚合器中的所有项目。
+    其中αia表示与va互动的注意力权重，当根据互动历史记录C（i）来表征用户ui的偏好时，有助于用户ui的项目空间潜在因素。
+    特别地，我们使用两层神经网络将项目注意αia参数化，我们将其称为注意网络。 注意网络的输入是交互和目标用户ui的pi的意见感知表示xia。
+    正式地，注意力网络被定义为：
+    
+    ![公式5](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/math5.png)
+    
+    上式得到的α^{*}_{ia}通过SoftMax,得到归一化的最后的权重α_{ia}，就是公式4中的αia
+    
+    ![公式6](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/math6.png)
 
+    
+    
+   
+    
 - 第二种聚合是社交聚合，其中从社交图了解社交空间用户潜在因子hSi∈Rd。 
 
 然后，将这两个因素组合在一起以形成最终用户潜在因素hi。
