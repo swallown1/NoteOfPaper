@@ -64,7 +64,7 @@
 	![](https://github.com/swallown1/NoteOfPaper/tree/master/WWW/GNNforSocialRec/images/math1.png)
 	其中C（i）是用户ui已与之交互的项目集（或用户项目图中ui的邻居），xia是表示ui与项目va之间的感知感知交互的表示向量，而Aggreitems为 项目汇总功能。 
 	其中xia由下图可得
-	![](https://github.com/swallown1/NoteOfPaper/tree/master/WWW/GNNforSocialRec/images/math4.png)
+	![公式2](https://github.com/swallown1/NoteOfPaper/tree/master/WWW/GNNforSocialRec/images/math4.png)
 	
 
 - 第二种聚合是社交聚合，其中从社交图了解社交空间用户潜在因子hSi∈Rd。 
