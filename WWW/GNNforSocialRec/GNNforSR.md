@@ -60,9 +60,12 @@
 
 方法：使用两种类型的聚合来从两个图中学习因子。
 
-- 第一种聚合（表示为项目聚合）被用来从用户-那里获取项目空间用户潜在因子hIi∈Rd。 项聚合的目的是通过考虑用户ui与之交互的项以及用户对这些项的意见，来学习项空间用户潜在因子hIi。 为了数学上表示此聚合，我们使用以下函数作为：
-	![](https://github.com/swallown1/NoteOfPaper/tree/master/WWW/GNNforSocialRec/images/math1.png)
-	其中C（i）是用户ui已与之交互的项目集（或用户项目图中ui的邻居），xia是表示ui与项目va之间的感知感知交互的表示向量，而Aggreitems为 项目汇总功能。 
+- 第一种聚合（表示为项目聚合）被用来从用户-那里获取项目空间用户潜在因子hIi∈Rd。 项聚合的目的是通过考虑用户ui与之交互的项以及用户对这些项的意见，来学习项空间用户潜在因子hIi。 
+    为了数学上表示此聚合，我们使用以下函数作为：
+	![公式1](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/math1.png)
+	其中C（i）是用户ui已与之交互的项目集（或用户项目图中ui的邻居），
+	
+	xia是表示ui与项目va之间的感知感知交互的表示向量，而Aggreitems为 项目汇总功能。 
 	其中xia由下图可得
 	![公式2](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/math4.png)
 	
