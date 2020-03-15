@@ -32,6 +32,11 @@
 
 ### GraphRec 模型结构
 
+**模型的整体结构图**
+
+![GraphRec](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/model.png)
+	
+
 #### 2.1 Definitions and Notations
 
 我们假设R∈Rn×m是用户项目评分矩阵，也称为用户项目图。 如果ui给vj评分，则rij为评分分数，否则我们用0表示从ui到vj的未知评分，即rij =0。观察到的评分分数rij可被视为用户ui对 项目vj。
@@ -91,11 +96,87 @@
     上式得到的α^{*}_{ia}通过SoftMax,得到归一化的最后的权重α_{ia}，就是公式4中的αia
     
     ![公式6](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/math6.png)
-
-    
-    
+ 
    
     
 - 第二种聚合是社交聚合，其中从社交图了解社交空间用户潜在因子hSi∈Rd。 
+    
+    从这种社交角度表示用户潜在因素，我们提出了社交空间用户潜在因素，这是从社交图中聚合相邻用户的项目空间用户潜在因素。 特别地，ui的社交空间用户潜能因子hSi是聚合ui的邻居N（i）中用户的项目空间用户潜能因子，如下所示：
+    
+    ![公式7](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/math7.png)
+    
+    其中h_{0}^{I}是指user model中的输出结果，Aggre类似于项目聚集中的均值算子，它采用hIo中向量的元素式均值。公式如下:
+     
+     ![公式8](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/match8.png)
+     
+     其中βi固定为1 | N（i）| 基于均值的聚合器的所有邻居。 假设所有邻居均对用户ui的表示做出同等贡献
+     
+     因此我们通过两层神经网络执行注意力机制，以通过将社会注意力βio与hIo和目标用户嵌入pi关联起来，提取对ui有重要影响的这些用户，并建立他们的联系强度，如下所示：
+     
+     ![公式9-11](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/math911.png)
+     
 
-然后，将这两个因素组合在一起以形成最终用户潜在因素hi。
+**Learning User Latent Factor**
+
+将上面这两个因素组合在一起以形成最终用户潜在因素hi，然后将hi输入到MLP中。公式如下：
+
+![公式9-11](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/math1214.png)
+
+其中l是MLP网络的层数
+
+
+### 2.4 Item Modeling
+
+项目建模用于通过用户聚合来了解itemvj的项目潜在因子，表示为zj。
+
+**用户聚合**： 同样，我们使用类似于通过项目聚合来学习项目空间用户潜在因素的方法。 对于每个项目vj，我们需要汇总来自与vj进行交互的一组用户的信息，记为B（j）。
+
+内容：
+
+1. 即使对于同一项目，用户在用户项目交互期间也可能表达不同的意见。 来自不同用户的这些意见可以以用户提供的不同方式捕获同一项目的特征，这可以帮助建模项目潜在因素。 对于从ut到vj与意见r的交互，我们引入了一个意见感知交互用户表示fjt，它是通过MLP从基本用户嵌入pt和意见嵌入er中获得的，表示为дu。 解决方案是将交互信息与意见信息融合在一起：
+	
+	![公式15](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/math15.png)
+
+2. 为了学习项目潜在因子zj，我们还建议在B（j）中针对项目vj聚合用户的意见感知交互表示。 用户聚合函数表示为Agguser，用于将fjt中的用户感知感知的交互表示聚合为：
+
+	![公式16](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/math16.png)
+
+3. 我们引入了一种注意机制，以fjt和qj为输入，通过两层神经注意网络来区分用户的重要权重µjt
+
+	![公式17-19](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/match1719.png)
+
+用户关注度是为了捕获用户项目交互对学习项目潜在因素的不同影响。
+
+### Rating Prediction
+
+GraphRec模型应用于评级预测的推荐任务。 借助用户和项目的潜在因素（即hi和zj），我们可以先将它们hi⊕zj串联起来，然后将其输入到MLP中以进行评分预测：
+
+![公式20-23](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/math2023.png)
+
+
+### 2.6 Model Training
+
+该模型采用平方损失函数，公式如下：
+	
+![公式24](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/match24.png)
+
+ 为了优化目标函数，我们在实现中采用RMSprop作为优化器，而不是普通的SGD。 每次，它会随机选择一个训练实例，并朝其负梯度的方向更新每个模型参数。 我们的模型中有3种嵌入，包括项目嵌入qj，用户嵌入pi和意见嵌入er。 它们是随机初始化的，并在培训阶段共同学习。 由于原始特征非常大且稀疏，因此我们不使用one-hot向量来表示每个用户和每个项目。 通过将高维稀疏特征嵌入到低维潜在空间中，可以轻松训练模型。同时为了防止过拟合，采用drop的方式进行训练，并在测试中关闭drop。
+
+
+### Experiment
+
+与一些baseline比较所得结果：
+
+![表格3](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/table3.png)
+
+后续有分别对社交网络与用户意见的影响做了分析：
+
+![Figure3](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/f3.png)
+
+对注意力机制的探索：
+
+![Figure4](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/f4.png)
+
+也对embedding的大小做了比较：
+
+![Figure5](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/f5.png)
