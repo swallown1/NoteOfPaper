@@ -18,6 +18,11 @@
 - [Neural Graph Collaborative Filtering Xiang Wang, Xiangnan He, Meng Wang, Fuli Feng, Tat-Seng Chua 2019](https://arxiv.org/abs/1905.08108?context=cs.IR)
 
 
+### WWW
+
+- [ Graph Neural Networks for Social Recommendation Wenqi Fan, Yao Ma , Qing Li, Yuan He, Eric Zhao WWW 2019]( https://arxiv.org/abs/1902.07243 )
+
+
 
 
 ### GCN on Recommender Systems(#content)
