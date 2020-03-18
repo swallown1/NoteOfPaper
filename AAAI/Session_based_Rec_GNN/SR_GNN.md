@@ -59,3 +59,14 @@ GNN十分适合用于基于会话的推荐算法，因为它可以根据丰富�
 连接矩阵(connection matrix) $A_s \in R^{n \times 2n}$ 决定了图中的节点之间如何连接，$A_s$ 由两个邻接矩阵( $A_s^{(out)}$ 和 $A_s^{(in)}$ )拼接(concat)而成， $A_{s,i:}$表示的是节点 $v_{s,i}$ 分别在 $A_s^{(out)}$ 和 $A_s^{(in)}$ 对应的两列 
 
 ![](https://github.com/swallown1/NoteOfPaper/blob/master/AAAI/Session_based_Rec_GNN/images/f2.png)
+
+
+
+
+
+## 参考资料
+
+![论文笔记」Session-based Recommendation with GNN](https://zhuanlan.zhihu.com/p/82796415)
+![SR-GNN论文解读(AAAI2019)](https://blog.csdn.net/yfreedomliTHU/article/details/91345348)
+![模型解读：基于会话的最优推荐模型SR-GNN](https://zhuanlan.zhihu.com/p/65749652)
+
