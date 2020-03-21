@@ -114,7 +114,9 @@ $$\hat y = Softmax(\hat Z)$$
 
 ## 参考资料
 
-![论文笔记」Session-based Recommendation with GNN](https://zhuanlan.zhihu.com/p/82796415)
-![SR-GNN论文解读(AAAI2019)](https://blog.csdn.net/yfreedomliTHU/article/details/91345348)
-![模型解读：基于会话的最优推荐模型SR-GNN](https://zhuanlan.zhihu.com/p/65749652)
+[论文笔记」Session-based Recommendation with GNN](https://zhuanlan.zhihu.com/p/82796415)
+
+[SR-GNN论文解读(AAAI2019)](https://blog.csdn.net/yfreedomliTHU/article/details/91345348)
+
+[模型解读：基于会话的最优推荐模型SR-GNN](https://zhuanlan.zhihu.com/p/65749652)
 
