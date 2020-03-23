@@ -33,7 +33,7 @@ Memorization根据历史行为数据，产生的推荐通常和用户已有行�
 
 Wide & Deep模型结合了LR和DNN，其框架图如下所示。
 
-[Wide&Deep](https://img-blog.csdn.net/20171007203832263?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZ29vZ2xlMTk4OTAxMDI=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
+！[Wide&Deep](https://img-blog.csdn.net/20171007203832263?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZ29vZ2xlMTk4OTAxMDI=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
 
 Wide 该部分是广义线性模型，即
 
