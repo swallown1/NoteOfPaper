@@ -33,7 +33,7 @@ Memorization根据历史行为数据，产生的推荐通常和用户已有行�
 
 Wide & Deep模型结合了LR和DNN，其框架图如下所示。
 
-！[Wide&Deep](https://img-blog.csdn.net/20171007203832263?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZ29vZ2xlMTk4OTAxMDI=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
+![Wide&Deep](https://img-blog.csdn.net/20171007203832263?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZ29vZ2xlMTk4OTAxMDI=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
 
 Wide 该部分是广义线性模型，即
 
@@ -46,10 +46,10 @@ $a^{l+1}=f(W^l a^l+ b^l)$ ，其中 a^l,b^l,W^l 是第 i 层的激活值、偏�
 损失函数 模型选取logistic loss作为损失函数，此时Wide & Deep最后的预测输出为：
 
 $$
-p(y=1|x) = \sigmoid(W^T_{wide}[x,f(x)]+W^T_{deep} a^{lf}+b)
+p(y=1|x) = \theta(W^T_{wide}[x,f(x)]+W^T_{deep} a^{lf}+b)
 $$
 
-其中 $\sigmoid$表示sigmoid函数， f(x) 表示叉乘特征， $a^{lf}$ 表示NN最后一层激活值。
+其中 $\theta$表示sigmoid函数， f(x) 表示叉乘特征， $a^{lf}$ 表示NN最后一层激活值。
 
 
  - 联合训练
