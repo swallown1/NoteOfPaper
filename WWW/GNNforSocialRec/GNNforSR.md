@@ -75,9 +75,11 @@
 	
 	xia是表示ui与项目va之间的感知感知交互的表示向量，而Aggreitems为 项目汇总功能。 
 	
-	其中xia由上图可得
-	![公式2](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/math4.png)
 	
+	![公式2](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/math4.png)
+
+	其中xia由上图可得，对于这个$g_v$其实是两层神经网络，详情可参考代码。
+
 	其中⊕表示两个向量之间的串联运算。
 	
 	Aggreitems的一种流行的聚集函数是均值算子，我们采用{xia，∀a∈C（i）}中向量的元素平均法。其函数如下： 
@@ -180,3 +182,8 @@ GraphRec模型应用于评级预测的推荐任务。 借助用户和项目的�
 也对embedding的大小做了比较：
 
 ![Figure5](https://github.com/swallown1/NoteOfPaper/blob/master/WWW/GNNforSocialRec/images/f5.png)
+
+
+### Conclusion
+
+在本文中，我们提出了针对社会推荐问题的SocialGCN模型。 我们的模型结合了GCN的优势（用于对社交网络中的扩散过程进行建模）和经典的基于潜在因子的模型来捕获用户项目偏好。 具体来说，用户嵌入是按分层扩散方式构建的，初始用户嵌入取决于当前用户的特征以及用户特征向量中未包含的自由用户潜在向量。 同样，每个项目的潜在矢量也是该项目的免费潜在矢量及其特征表示的组合。 我们表明，当用户和项目属性不可用时，建议的SocialGCN模型是灵活的。 实验结果清楚地表明了我们提出的模型的灵活性和有效性。 例如，在Flickr上，SocialGCN比NDCG的最佳基准提高了13.73％。 将来，我们希望探索GCN，以用于更多的社会推荐应用，例如社会影响力建模，时间社会推荐等。
