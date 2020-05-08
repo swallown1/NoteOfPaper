@@ -1,7 +1,3 @@
-
-# Neural-Attentive-Session-Based-Recommendation
--------
-
 论文：Neural Attentive Session-based Recommendation
 
 作者： Jing Li，Pengjie Ren，Zhumin Chen
@@ -86,9 +82,11 @@ Local Encoder 的结构和 Global Encoder的结构类似，使用GRU作为基础
 
 
 5.  NARM Model
+![image.png](https://upload-images.jianshu.io/upload_images/3426235-e72621634647f05b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
 从前面的介绍可以看出 global encoder是对于整个序列行为的汇总， local encoder则是用来捕获session序列中对于捕获用户兴趣的比较重要的item。我们推测，序列行为的表示可能为捕获当前会话中用户的主要目的提供有用的信息。因此，我们使用顺序行为的表示形式和先前的隐藏状态来计算每个单击项的注意权重。
 
-下下图中，hgt是global encoder的输出，合并到ct中，为NARM提供一个顺序行为表示。应该注意的是，NARM中的会话特征生成器将在全局编码器和本地编码器中调用不同的编码机制，尽管它们稍后将组合起来形成统一的表示。同时hgt相对于
+下图中，hgt是global encoder的输出，合并到ct中，为NARM提供一个顺序行为表示。应该注意的是，NARM中的会话特征生成器将在全局编码器和本地编码器中调用不同的编码机制，尽管它们稍后将组合起来形成统一的表示。同时hgt相对于
  local encoder每个hlt有很大的不同，前者负责对整个顺序行为进行编码。后者用于计算前一隐藏状态下的注意权值。这样，将这两部分进行结合，使得用户的顺序行为和当前会话中的主要目的都可以建模为统一的表示ct。而ct是由cgt和clt拼接而成：
 ![](https://upload-images.jianshu.io/upload_images/3426235-7086f5f76db9b9dc.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
@@ -126,6 +124,90 @@ NARM于5个传统方法(POP, S-POP, Item-KNN, BPR-MF and FPMC)以及两个以RNN
 对于模型的组成，当然是同时考虑global encoder和local encoder的时候是最好的。
 对于序列的长度，在4-17个的时候最佳。会话长度特长的时候，效果会下降，本文认为原因是，当一个会话太长时，用户很可能会盲目地点击一些条目，这样NARM中的本地编码器就无法捕获当前会话中用户的主要目的。
 
+
+### 代码部分
+先给出该模型的一个pytorch版本的[代码地址]()
+主要是看看模型实现的细节部分
+
+1.  init参数部分
+
+ self.emb将所有的item转化成 self.embedding_dim维度的嵌入向量。
+
+self.gru 是模型中的GRU基础单元， 其中nn.GRU(self.embedding_dim, self.hidden_size, self.n_layers) ，self.n_layers表示GRU的个数，self.embedding_dim表示输入的xt的维度，self.hidden_size表示隐层输出(ht)  的维度。
+```
+def __init__(self, n_items, hidden_size, embedding_dim, batch_size, n_layers = 1):
+        super(NARM, self).__init__()
+        self.n_items = n_items
+        self.hidden_size = hidden_size
+        self.batch_size = batch_size
+        self.n_layers = n_layers
+        self.embedding_dim = embedding_dim
+        self.emb = nn.Embedding(self.n_items, self.embedding_dim, padding_idx = 0)
+        self.emb_dropout = nn.Dropout(0.25)
+        self.gru = nn.GRU(self.embedding_dim, self.hidden_size, self.n_layers)
+        self.a_1 = nn.Linear(self.hidden_size, self.hidden_size, bias=False)
+        self.a_2 = nn.Linear(self.hidden_size, self.hidden_size, bias=False)
+        self.v_t = nn.Linear(self.hidden_size, 1, bias=False)
+        self.ct_dropout = nn.Dropout(0.5)
+        self.b = nn.Linear(self.embedding_dim, 2 * self.hidden_size, bias=False)
+        #self.sf = nn.Softmax()
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+```
+
+2. 模型的细节
+
+embs ：将序列中的每个X转化成embedding，
+
+self.b:是公式10中的B，目的是将Ct 从2*self.embedding_dim 转化成 self.embedding_dim
+
+```
+
+    def forward(self, seq, lengths):
+          # gru中  隐层的矩阵参数
+        hidden = self.init_hidden(seq.size(1))
+        embs = self.emb_dropout(self.emb(seq))
+        # 将embs 按照lengths进行压缩
+        embs = pack_padded_sequence(embs, lengths)
+        gru_out, hidden = self.gru(embs, hidden)
+        gru_out, lengths = pad_packed_sequence(gru_out)
+
+        # 去最后一个GRU的隐层作为 hgt
+        ht = hidden[-1]
+        gru_out = gru_out.permute(1, 0, 2)
+          #  hgt作为文中的 c_global 
+        c_global = ht
+
+        #每一个GRU的输出，即hj，将其进行线性转换   Whj
+        q1 = self.a_1(gru_out.contiguous().view(-1, self.hidden_size)).view(gru_out.size())  
+        # 将ht进行线性转换  Whi
+        q2 = self.a_2(ht)
+        
+        mask = torch.where(seq.permute(1, 0) > 0, torch.tensor([1.], device = self.device), torch.tensor([0.], device = self.device))
+        q2_expand = q2.unsqueeze(1).expand_as(q1)
+        q2_masked = mask.unsqueeze(2).expand_as(q1) * q2_expand
+        # 对应文章公式8  计算att 注意力权值
+        alpha = self.v_t(torch.sigmoid(q1 + q2_masked).view(-1, self.hidden_size)).view(mask.size())
+
+        #计算文中的local encoder   α*(Whj+Wht)
+        c_local = torch.sum(alpha.unsqueeze(2).expand_as(gru_out) * gru_out, 1)
+        
+        #计算得到文中的Ct
+        c_t = torch.cat([c_local, c_global], 1)
+        c_t = self.ct_dropout(c_t)
+        
+        #将所有的item进行Embedding
+        item_embs = self.emb(torch.arange(self.n_items).to(self.device))
+        #公式10
+        scores = torch.matmul(c_t, self.b(item_embs).permute(1, 0))
+        #经过softmax
+        # scores = self.sf(scores)
+
+        return scores
+
+    def init_hidden(self, batch_size):
+        return torch.zeros((self.n_layers, batch_size, self.hidden_size), requires_grad=True).to(self.device)
+        
+```
 
 
 
