@@ -15,7 +15,22 @@
 全组合肯定也存在巨大的问题？
 
 
-2、Disentangled Graph Collaborative Filtering
+2、Multi-behavior Recommendation with Graph Convolution Networks
+* [论文](../paper/MBGCN.pdf)
+* 代码 : 无
+
+**摘要**
+通常仅利用一种类型的用户-项目交互的传统推荐模型面临严重的数据稀疏性或冷启动问题。 
+利用多种类型的用户项目互动（例如点击和收藏夹）的多行为推荐可以作为有效的解决方案。 
+早期针对多行为推荐的努力未能捕捉到行为对目标行为的不同影响力。 他们也忽略了多行为数据中隐含的行为语义。 
+这两个局限性都使得数据不能被充分利用以改善对目标行为的建议性能。
+在这项工作中，我们通过创新性地构造一个表示多行为数据的统一图形并提出了一个名为MBGCN（多行为图形卷积网络的缩写）的新模型来解决此问题。 
+MBGCN通过用户项目传播层学习行为强度，并通过项目项目传播层捕获行为语义，可以很好地解决现有工作的局限性。 
+在两个真实世界的数据集上的经验结果验证了我们的模型在利用多行为数据中的有效性。
+我们的模型在两个数据集上的平均基准性能分别比最佳基准高25.02％和6.51％。 对冷启动用户的进一步研究证实了我们提出的模型的实用性。
+![](2020_papers_files/3.jpg)
+
+3、Disentangled Graph Collaborative Filtering
 * [论文](../paper/DisenGCN.pdf)
 * [代码](https://github.com/xiangwang1223/disentangled_graph_collaborative_filtering.)
 
@@ -36,3 +51,5 @@
 
 
 
+MVIN: Learning multiview items for recommendation
+Neighbor Interaction Aware Graph Convolution Networks for Recommendation
