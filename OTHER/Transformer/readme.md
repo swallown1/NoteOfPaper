@@ -192,6 +192,84 @@ Transformer模型中，Position Embedding是位置信息的唯一来源，因此
 
 ### 代码部分：
 
+代码部分详细参考了文哥的内容，可以参考这个[一步步解析Attention is All You Need！](https://www.jianshu.com/p/b1030350aadb)
+
+在代码部分的学习
+
+1、Embedding部分
+这里因为句子的不定长的输入，为了并行计算，采用了mask的方法。因此对于idex为0的部分将Embedding设置成0向量，为后面计算attention部分也是
+做了一个准备。  
+
+对于Embedding进行scale操作，具体形式是将Embedding乘以了一个$\sqrt d_{embedding}$。
+**主要的意义是为了将方差控制为1，也就有效地控制了前面提到的梯度消失的问题。** 作者的认为是，点积值将整个softmax推向梯度平缓区，使得收敛困难。
+可以[参考](https://www.zhihu.com/question/339723385)。
+
+
+其次是Position Embedding。主要是根据公式(三角函数计算)得到所有位置的嵌入。然后根据位置的idx得到Position Embedding。
+
+
+2、Scaled Dot-Product Attention
+
+根据点积的注意力计算是这篇论文的核心部分。
+
+- 先通过nn.Linear进行线性变换。需要注意的是，如果是encoder的self-attention部分，query和key-value输入的embedding是一样的。
+- 相似度计算，该部分主要就是利用Q和K进行矩阵乘法，这样就可以得到一个  Max_len * Max_len 的权重矩阵，不过这时候并没有进行softmax。
+	* 但是对于self-attention部分来说，由于我们padding进去idx=0的嵌入向量，我们要排除idex=0和其他位置的权重关系。因此需要将这部分进行
+	赋值一个很小的值(-2**32+1;为什么是因为softmax的时候，这部分就会变成0，即权重值为0)。
+	
+	这里具体做法是，因为idx=0的Embedding是全0嵌入，因此对Embedding进行加总，如果是0表示该位置的idx=0的部分。
+	这样可以构造一个key_masks，若果存在0，只需要在在对应位置设置一个最小值即可
+	
+	```
+	key_masks = torch.sin(torch.abs(torch.sum(x, -1)))
+	key_masks = key_masks.unsqueeze(1).repeat(1,list(x)[1],1)
+	# 去除idex=0的embedding对计算注意力带来的影响。
+	# 这是对Encoder部分这么计算注意力值
+	padding = torch.ones_like(outputs)*(-2**32+1)
+	outputs = torch.where(torch.equal(key_masks,0),padding,outputs)
+	```
+	
+	* 但是对于Decoder的self-attention来说，我们是不能看到未来的信息的，所以对于decoder的输入，
+		我们只能计算它和它之前输入的信息的相似度。
+		
+		并且在Decoder的中其实encoder-decoder Attention也是利用这个结构计算的
+		但是这里query是 encoder的输入 key-value都是encoder的输出。
+		
+		具体的做法是首先得到一个下三角矩阵，这个矩阵主对角线以及下方的部分是1，
+		其余部分是0，然后根据1或者0来选择使用output还是很小的数进行填充：
+		
+		```
+		diag_vals = torch.ones_like(outputs[0, :, :])
+		tril = torch.tril(diag_vals)
+		masks = tril.unsqueeze(0).repeat(list(outputs)[0],1,1)
+		
+		paddings = torch.ones_like(masks) * (-2 ** 32 + 1)
+		outputs = torch.where(torch.equal(masks, 0), paddings, outputs)
+		```
+	接下来利用softmax就可以得到权重矩阵。
+	
+3、Multi-Head Attention
+
+该部分和Scaled Dot-Product Attention大部分是类似的，只不过这里需要注意的就是
+我们需要有多个Q、K、V。这里的一个技巧就是将每个单词的嵌入分割，得到8个 B*Max_len*emb_size
+然后在吧8个矩阵按照最外度进行拼接，这样这8个head就可以并行计算，最后只需要
+再将它们转换回来
+
+```
+q_=torch.cat(torch.split(q,self.emb_size//self.num_heads,2),0)
+k_=torch.cat(torch.split(k,self.emb_size//self.num_heads,2),0)
+v_=torch.cat(torch.split(v,self.emb_size//self.num_heads,2),0)
+....
+outputs = torch.cat(torch.split(outputs,list(outputs.shape)[0]//self.num_heads,0),2)
+       
+```
+
+这里需要注意torch.split 第二个参数是指分割后的维度  
+不同于tf.split中参数二，其指的是分割成几份。
+
+以上就是代码中主要记录的点
+
+
 
 
 ## 参考
